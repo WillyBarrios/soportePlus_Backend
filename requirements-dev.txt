@@ -1,0 +1,7 @@
+# Development requirements
+-r requirements.txt
+
+# Additional development tools
+ipython==8.15.0
+ipdb==0.13.13
+flask-shell-ipython==1.4.0
