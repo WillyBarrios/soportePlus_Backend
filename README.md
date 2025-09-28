@@ -233,7 +233,7 @@ Este proyecto está bajo la licencia MIT. Ver `LICENSE` para más detalles.
 
 ## 👨‍💻 Autor
 
-**Tu Nombre**
+**Grupo de desarrollo FUllStack**
 - GitHub: [@tu-usuario](https://github.com/tu-usuario)
 - Email: tu-email@ejemplo.com
 
