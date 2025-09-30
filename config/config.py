@@ -12,7 +12,7 @@ class Config:
     TESTING = False
     
     # Database
-    SQLALCHEMY_DATABASE_URI = config('DATABASE_URL', default='sqlite:///app.db')
+    SQLALCHEMY_DATABASE_URI = config('DATABASE_URL', default='mysql+pymysql://root:Aa12345678@localhost/soporteplus')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
     
@@ -45,8 +45,13 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = config(
         'DEV_DATABASE_URL',
-        default='postgresql://user:password@localhost/soporteplus_dev'
+        default='mysql+pymysql://root:@localhost/soporteplus'
     )
+    # MariaDB/MySQL specific settings
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_recycle': 300,
+        'pool_pre_ping': True
+    }
 
 
 class ProductionConfig(Config):

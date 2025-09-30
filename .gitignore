@@ -92,3 +92,5 @@ uploads/
 
 # Migrations (uncomment if you want to ignore migrations)
 # migrations/
+DEVELOPMENT.md
+PROJECT_CLEAN.md
