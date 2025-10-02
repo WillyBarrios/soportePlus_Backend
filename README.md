@@ -1,99 +1,70 @@
 # SoportePlus Backend
 
-Backend API REST desarrollado con Flask para el sistema SoportePlus, conectado a base de datos MariaDB.
+Sistema de gestión de tickets de soporte técnico desarrollado con Flask y conectado a base de datos MySQL remota.
 
 ## 🚀 Características
 
-- **Framework**: Flask con arquitectura modular
-- **Base de datos**: MariaDB 12.0.2 (compatible con MySQL)
-- **Autenticación**: JWT tokens
-- **Validación**: Marshmallow schemas
-- **Migraciones**: Flask-Migrate
-- **CORS**: Configurado para desarrollo frontend
-- **ORM**: SQLAlchemy 2.0
+- **Autenticación JWT**: Sistema completo de login/logout con tokens seguros basado en email
+- **Gestión de Usuarios**: Sistema de roles (Administrador/Técnico)
+- **Gestión de Tickets**: CRUD completo para tickets de soporte
+- **Base de Datos Remota**: Conectado a servidor MySQL/MariaDB en Linux (173.214.172.154)
+- **API RESTful**: Endpoints bien documentados y estructurados
+- **Arquitectura Modular**: Blueprints organizados por funcionalidad
 
-## 🗃️ Base de Datos
+## 🛠️ Tecnologías
 
-- **Servidor**: MariaDB 12.0.2
+- **Backend**: Flask 2.3.3
+- **Base de Datos**: MySQL/MariaDB remoto con PyMySQL
+- **ORM**: SQLAlchemy 2.0.21
+- **Autenticación**: Flask-JWT-Extended 4.5.3
+- **Validación**: Marshmallow 3.20.1
+- **CORS**: Flask-CORS configurado
+- **Migraciones**: Flask-Migrate 4.0.5
+
+## 📊 Estructura de la Base de Datos
+
+### Base de Datos Remota
+- **Servidor**: Linux 173.214.172.154
 - **Base de datos**: `soporteplus`
-- **Conexión**: `mysql+pymysql://root:password@localhost/soporteplus`
-- **Driver**: PyMySQL
-- **Charset**: utf8mb4
+- **Usuario**: `wbarrios`
+- **Conexión**: `mysql+pymysql://wbarrios:Coconut%202112.@173.214.172.154/soporteplus`
 
-## 📁 Estructura del Proyecto
+### Tablas del Sistema (12 tablas):
+- `Usuario` - Usuarios del sistema con roles
+- `Tiquet` - Tickets de soporte técnico
+- `Cat_tiquet` - Categorías de tickets
+- `Estado_tiquet` - Estados de tickets (Abierto, En proceso, Cerrado, etc.)
+- `Catalogo_criticidad` - Niveles de criticidad (Baja, Media, Alta, Crítica)
+- `Ubicaciones` - Ubicaciones físicas/departamentos
+- `Comentarios` - Comentarios de tickets
+- `Log_transaccional` - Auditoría de transacciones
+- `Cat_problema` - Categorías de problemas
+- `Prioridades` - Niveles de prioridad
+- `Empleados` - Información de empleados
+- `Clientes` - Información de clientes
 
-```
-soportePlus_Backend/
-├── app/
-│   ├── models/          # Modelos de base de datos
-│   ├── routes/          # Blueprints y rutas API
-│   ├── services/        # Lógica de negocio
-│   ├── utils/           # Utilidades y helpers
-│   └── __init__.py      # Factory de aplicación
-├── config/
-│   ├── config.py        # Configuraciones por entorno
-│   └── __init__.py
-├── migrations/          # Migraciones de base de datos
-├── tests/              # Tests unitarios
-├── venv/               # Entorno virtual Python
-├── .env                # Variables de entorno (local)
-├── .env.example        # Ejemplo de variables de entorno
-├── requirements.txt    # Dependencias de producción
-├── requirements-dev.txt # Dependencias de desarrollo
-└── run.py             # Punto de entrada de la aplicación
+## 🚀 Instalación
+
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/WillyBarrios/soportePlus_Backend.git
+cd soportePlus_Backend
 ```
 
-## 🛠️ Instalación
+### 2. Crear entorno virtual
+```bash
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
+```
 
-### Prerrequisitos
+### 3. Instalar dependencias
+```bash
+pip install -r requirements.txt
+```
 
-- Python 3.9+
-- MariaDB/MySQL
-- Git
-
-### Configuración del Entorno
-
-1. **Clonar el repositorio**
-   ```bash
-   git clone <url-del-repositorio>
-   cd soportePlus_Backend
-   ```
-
-2. **Crear entorno virtual**
-   ```powershell
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   ```
-
-3. **Instalar dependencias**
-   ```powershell
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
-   ```
-
-4. **Configurar variables de entorno**
-   ```powershell
-   Copy-Item .env.example .env
-   # Editar .env con tus credenciales de base de datos
-   ```
-
-5. **Configurar base de datos**
-   ```powershell
-   flask db upgrade
-   flask create-admin
-   ```
-
-6. **Ejecutar la aplicación**
-   ```powershell
-   flask run
-   # O alternativamente:
-   python run.py
-   ```
-
-## ⚙️ Configuración
-
-### Variables de Entorno (.env)
-
+### 4. Configurar variables de entorno
+Crear archivo `.env` con:
 ```env
 # Flask Configuration
 FLASK_APP=run.py
@@ -101,330 +72,257 @@ FLASK_ENV=development
 SECRET_KEY=your-secret-key
 JWT_SECRET_KEY=your-jwt-secret-key
 
-# Database Configuration
-DATABASE_URL=mysql+pymysql://user:password@localhost/soporteplus
-DEV_DATABASE_URL=mysql+pymysql://user:password@localhost/soporteplus
+# Remote Database Configuration
+DATABASE_URL=mysql+pymysql://wbarrios:Coconut%202112.@173.214.172.154/soporteplus
 
 # CORS Configuration
 CORS_ORIGINS=http://localhost:3000,http://localhost:8080
 ```
 
-## 🔗 API Endpoints
-
-### Autenticación
-- `POST /api/auth/login` - Iniciar sesión
-- `POST /api/auth/logout` - Cerrar sesión
-- `POST /api/auth/refresh` - Renovar token
-
-### Usuarios
-- `GET /api/users/` - Listar usuarios
-- `POST /api/users/` - Crear usuario
-- `GET /api/users/<id>` - Obtener usuario
-- `PUT /api/users/<id>` - Actualizar usuario
-- `DELETE /api/users/<id>` - Eliminar usuario
-
-## 🚀 Uso
-
-### Ejecutar en Desarrollo
-```powershell
-# Activar entorno virtual
-.\venv\Scripts\Activate.ps1
-
-# Ejecutar servidor de desarrollo
+### 5. Ejecutar la aplicación
+```bash
+python run.py
+# O alternativamente:
 flask run
 ```
 
-### Gestión de Base de Datos
-```powershell
-# Crear nueva migración
-flask db migrate -m "Descripción del cambio"
+La aplicación estará disponible en `http://localhost:5000`
 
-# Aplicar migraciones
-flask db upgrade
+## 📚 API Endpoints
 
-# Crear usuario administrador
-flask create-admin
+### Autenticación
+- `POST /api/auth/login` - Iniciar sesión con email/password
+- `GET /api/auth/me` - Obtener información del usuario actual
+
+### Tickets
+- `GET /api/tickets/tickets` - Listar todos los tickets
+- `POST /api/tickets/tickets` - Crear nuevo ticket
+- `PUT /api/tickets/tickets/<id>` - Actualizar ticket existente
+- `DELETE /api/tickets/tickets/<id>` - Eliminar ticket
+
+### Catálogos de Soporte
+- `GET /api/tickets/categorias` - Obtener categorías de tickets
+- `GET /api/tickets/estados` - Obtener estados disponibles
+- `GET /api/tickets/criticidades` - Obtener niveles de criticidad
+- `GET /api/tickets/ubicaciones` - Obtener ubicaciones disponibles
+- `GET /api/tickets/prioridades` - Obtener niveles de prioridad
+
+## 🔐 Autenticación
+
+### Login con Email
+```bash
+POST /api/auth/login
+Content-Type: application/json
+
+{
+    "email": "jadmin@gmail.com",
+    "password": "secret123"
+}
 ```
 
-### Testing
-```powershell
-# Ejecutar tests
-pytest
-
-# Ejecutar tests con cobertura
-pytest --cov=app
-
-# Ejecutar tests específicos
-pytest tests/test_auth.py
+**Respuesta exitosa:**
+```json
+{
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+    "user": {
+        "id": 1,
+        "email": "jadmin@gmail.com",
+        "nombre": "Jesus",
+        "apellido": "Admin",
+        "tipo_usuario": "Administrador"
+    }
+}
 ```
 
-### Herramientas de Desarrollo
-```powershell
-# Formatear código
-black .
-
-# Verificar estilo de código
-flake8 .
-
-# Pre-commit hooks
-pre-commit install
-pre-commit run --all-files
+### Usar Token en Requests
+```bash
+Authorization: Bearer <access_token>
 ```
 
-## 👤 Usuario Administrador por Defecto
+## 👥 Usuarios del Sistema
 
-- **Usuario**: `admin`
-- **Contraseña**: `admin123`
-- **Email**: `admin@soporteplus.com`
+### Usuarios Administradores:
+- **Email**: `jadmin@gmail.com` / **Password**: `secret123`
+- **Email**: `madmin@gmail.com` / **Password**: `secret123`
 
-## 🌐 URLs de Desarrollo
+### Usuarios Técnicos:
+- **Email**: `padmin@test.com` / **Password**: `secret123`
+- **Email**: `aadmin@test.com` / **Password**: `secret123`
 
-- **Aplicación**: http://localhost:5000
-- **API Base**: http://localhost:5000/api/
-- **Documentación**: http://localhost:5000/api/docs (si está habilitada)
+Todos los usuarios tienen passwords hasheados con SHA-256 en la base de datos.
+
+## 📁 Estructura del Proyecto
+
+```
+soportePlus_Backend/
+├── app/
+│   ├── __init__.py          # Factory de aplicación Flask
+│   ├── models/
+│   │   ├── __init__.py      # Exports de modelos
+│   │   └── soporteplus_models.py  # Modelos SQLAlchemy (12 tablas)
+│   ├── routes/
+│   │   ├── __init__.py      # Registro de blueprints
+│   │   ├── auth.py          # Autenticación JWT con email
+│   │   ├── main.py          # Rutas principales
+│   │   ├── tickets.py       # CRUD de tickets y catálogos
+│   │   └── users.py         # Gestión de usuarios
+│   ├── services/            # Lógica de negocio
+│   │   └── __init__.py
+│   └── utils/
+│       ├── __init__.py
+│       └── error_handlers.py  # Manejadores de errores
+├── config/
+│   ├── __init__.py
+│   └── config.py            # Configuraciones por entorno
+├── migrations/              # Migraciones Flask-Migrate
+│   ├── alembic.ini
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions/
+│       └── ea2496fd28b6_initial_migration.py
+├── tests/                   # Tests unitarios
+│   ├── __init__.py
+│   └── test_basic.py
+├── .gitignore              # Archivos excluidos de Git
+├── requirements.txt        # Dependencias de producción
+├── requirements-dev.txt    # Dependencias de desarrollo
+├── pyproject.toml         # Configuración del proyecto
+└── run.py                 # Punto de entrada de la aplicación
+```
 
 ## 🔧 Desarrollo
 
-### Estructura de Modelos
-Los modelos de base de datos están en `app/models/` y utilizan SQLAlchemy ORM.
+### Ejecutar en modo desarrollo
+```bash
+# Activar entorno virtual
+venv\Scripts\activate
 
-### Rutas y Blueprints
-Las rutas están organizadas en blueprints en `app/routes/`:
-- `auth.py` - Autenticación y autorización
-- `users.py` - Gestión de usuarios
-- `main.py` - Rutas principales
+# Ejecutar con debug habilitado
+python run.py
+```
 
-### Servicios
-La lógica de negocio está en `app/services/` para mantener controladores ligeros.
+### Gestión de Base de Datos
+```bash
+# Aplicar migraciones (si es necesario)
+flask db upgrade
+
+# Crear nueva migración
+flask db migrate -m "Descripción del cambio"
+```
+
+### Testing
+```bash
+# Ejecutar tests básicos
+python -m pytest tests/
+```
+
+## 🌐 Configuración de Producción
+
+### Servidor Remoto
+La aplicación está configurada para conectarse a:
+- **Host**: Servidor Linux remoto (173.214.172.154)
+- **Base de datos**: `soporteplus`
+- **Puerto**: 3306 (MySQL estándar)
+- **SSL**: Conexión segura configurada
+
+### Variables de Entorno para Producción
+```env
+FLASK_ENV=production
+DATABASE_URL=mysql+pymysql://wbarrios:Coconut%202112.@173.214.172.154/soporteplus
+SECRET_KEY=production-secret-key
+JWT_SECRET_KEY=production-jwt-secret
+```
 
 ## 📦 Dependencias Principales
 
-- **Flask 2.3.3** - Framework web
-- **SQLAlchemy 2.0.21** - ORM
-- **Flask-Migrate 4.0.5** - Migraciones de BD
+- **Flask 2.3.3** - Framework web principal
+- **SQLAlchemy 2.0.21** - ORM para base de datos
+- **PyMySQL 1.1.0** - Driver MySQL/MariaDB
 - **Flask-JWT-Extended 4.5.3** - Autenticación JWT
-- **Marshmallow 3.20.1** - Serialización/validación
-- **PyMySQL 1.1.0** - Driver MariaDB/MySQL
+- **Flask-CORS** - Manejo de CORS para frontend
+- **Marshmallow 3.20.1** - Validación y serialización
+- **Flask-Migrate 4.0.5** - Migraciones de base de datos
 
 ## 🚀 Despliegue
 
-### Producción
+### Usando Gunicorn (Recomendado para producción)
 ```bash
-# Usar Gunicorn para producción
-gunicorn -w 4 -b 0.0.0.0:5000 "app:create_app('production')"
+pip install gunicorn
+gunicorn -w 4 -b 0.0.0.0:5000 "app:create_app()"
 ```
 
-### Docker (Opcional)
+### Usando Docker
 ```dockerfile
-# Ejemplo básico de Dockerfile
-FROM python:3.11
+FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:create_app('production')"]
+EXPOSE 5000
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:create_app()"]
 ```
 
-## 📄 Licencia
+## 🛡️ Seguridad
 
-[Especificar licencia del proyecto]
+- **Autenticación JWT**: Tokens seguros con expiración
+- **Passwords Hash**: SHA-256 en base de datos
+- **CORS Configurado**: Solo orígenes permitidos
+- **Validación de Entrada**: Marshmallow schemas
+- **Base de Datos Remota**: Conexión segura a servidor Linux
+
+## 📝 Ejemplos de Uso
+
+### Crear un Ticket
+```bash
+curl -X POST http://localhost:5000/api/tickets/tickets \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "titulo": "Problema con impresora",
+    "descripcion": "La impresora no responde",
+    "id_categoria": 1,
+    "id_criticidad": 2,
+    "id_ubicacion": 1
+  }'
+```
+
+### Obtener Categorías
+```bash
+curl -X GET http://localhost:5000/api/tickets/categorias \
+  -H "Authorization: Bearer <token>"
+```
 
 ## 🤝 Contribuir
 
 1. Fork el proyecto
 2. Crear rama de feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+3. Commit cambios (`git commit -m 'Agregar nueva funcionalidad'`)
 4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
 5. Crear Pull Request
-   ```
-
-2. **Crear entorno virtual**
-   ```bash
-   python -m venv venv
-   
-   # Windows
-   venv\Scripts\activate
-   
-   # Linux/Mac
-   source venv/bin/activate
-   ```
-
-3. **Instalar dependencias**
-   ```bash
-   # Dependencias de producción
-   pip install -r requirements.txt
-   
-   # Para desarrollo (incluye herramientas adicionales)
-   pip install -r requirements-dev.txt
-   ```
-
-4. **Configurar variables de entorno**
-   ```bash
-   cp .env.example .env
-   # Editar .env con tus configuraciones
-   ```
-
-5. **Inicializar base de datos**
-   ```bash
-   flask db init
-   flask db migrate -m "Initial migration"
-   flask db upgrade
-   
-   # Crear usuario administrador
-   flask create-admin
-   ```
-
-## 🏃‍♂️ Ejecución
-
-### Desarrollo
-```bash
-python run.py
-```
-
-### Producción con Gunicorn
-```bash
-gunicorn -w 4 -b 0.0.0.0:5000 run:app
-```
-
-La aplicación estará disponible en `http://localhost:5000`
-
-## 📋 API Endpoints
-
-### Autenticación
-- `POST /api/auth/register` - Registrar usuario
-- `POST /api/auth/login` - Iniciar sesión
-- `GET /api/auth/me` - Obtener usuario actual (requiere auth)
-
-### Usuarios
-- `GET /api/users/` - Listar usuarios (admin)
-- `GET /api/users/<id>` - Obtener usuario específico
-
-### General
-- `GET /` - Información de la API
-- `GET /health` - Health check
-
-### Ejemplo de Registro
-```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "usuario1",
-    "email": "usuario@ejemplo.com",
-    "password": "password123",
-    "first_name": "Juan",
-    "last_name": "Pérez"
-  }'
-```
-
-### Ejemplo de Login
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "usuario1",
-    "password": "password123"
-  }'
-```
-
-## 🗄️ Base de Datos
-
-### Migraciones
-```bash
-# Crear nueva migración
-flask db migrate -m "Descripción del cambio"
-
-# Aplicar migraciones
-flask db upgrade
-
-# Revertir migración
-flask db downgrade
-```
-
-### Modelos Incluidos
-- **User**: Usuario del sistema con autenticación
-- **BaseModel**: Modelo base con campos comunes (id, created_at, updated_at)
-
-## 🧪 Testing
-
-```bash
-# Ejecutar todos los tests
-pytest
-
-# Con coverage
-pytest --cov=app
-
-# Tests específicos
-pytest tests/test_auth.py
-```
-
-## 🔧 Configuración
-
-### Variables de Entorno
-
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
-| `FLASK_ENV` | Entorno de Flask | `development` |
-| `SECRET_KEY` | Clave secreta de Flask | `your-secret-key` |
-| `JWT_SECRET_KEY` | Clave secreta para JWT | `your-jwt-secret` |
-| `DATABASE_URL` | URL de base de datos | `postgresql://user:pass@localhost/db` |
-| `CORS_ORIGINS` | Orígenes permitidos para CORS | `http://localhost:3000` |
-
-### Configuraciones por Entorno
-
-- **Development**: Debug habilitado, SQLite local
-- **Production**: Debug deshabilitado, PostgreSQL, configuraciones de seguridad
-- **Testing**: Base de datos en memoria, configuraciones de prueba
-
-## 📦 Dependencias Principales
-
-- **Flask**: Framework web
-- **Flask-SQLAlchemy**: ORM
-- **Flask-Migrate**: Migraciones de BD
-- **Flask-JWT-Extended**: Autenticación JWT
-- **Flask-CORS**: Manejo de CORS
-- **Marshmallow**: Validación y serialización
-- **PostgreSQL**: Base de datos principal
-- **Gunicorn**: Servidor WSGI para producción
-
-## 🔐 Seguridad
-
-- Autenticación basada en JWT tokens
-- Passwords hasheados con Werkzeug
-- CORS configurado apropiadamente
-- Headers de seguridad en producción
-- Validación de entrada con Marshmallow
-
-## 📝 Comandos CLI Útiles
-
-```bash
-# Inicializar base de datos
-flask init-db
-
-# Crear usuario administrador
-flask create-admin
-
-# Shell interactivo con contexto de app
-flask shell
-```
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crear rama de feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la licencia MIT. Ver `LICENSE` para más detalles.
+Este proyecto es de uso interno para el sistema de soporte técnico.
 
-## 👨‍💻 Autor
+## 👨‍💻 Desarrolladores
 
-**Grupo de desarrollo FUllStack**
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- Email: tu-email@ejemplo.com
+**Equipo de Desarrollo SoportePlus**
+- **Lead Developer**: Willy Barrios
+- **GitHub**: [@WillyBarrios](https://github.com/WillyBarrios)
+- **Año**: 2025
 
 ---
 
-¿Necesitas ayuda? Abre un issue en el repositorio.
+### 📋 Estado del Proyecto
+
+✅ **Backend completo y funcional**  
+✅ **Base de datos remota configurada**  
+✅ **Autenticación JWT implementada**  
+✅ **4 usuarios reales migrados**  
+✅ **12 tablas de base de datos operativas**  
+✅ **API REST completamente documentada**  
+✅ **Listo para integración con frontend**
+
+---
+
+*Para soporte técnico o preguntas sobre la implementación, contactar al equipo de desarrollo.*

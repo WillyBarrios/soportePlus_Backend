@@ -92,5 +92,14 @@ uploads/
 
 # Migrations (uncomment if you want to ignore migrations)
 # migrations/
+
+# Temporary files
+*_clean.py
+*_temp.py
+*_backup.py
+
+# Documentation files (temporary)
 DEVELOPMENT.md
 PROJECT_CLEAN.md
+MIGRATION_SUCCESS.md
+scripts.bat

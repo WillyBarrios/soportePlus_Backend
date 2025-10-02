@@ -33,10 +33,12 @@ def create_app(config_name='default'):
     from app.routes.auth import auth_bp
     from app.routes.users import users_bp
     from app.routes.main import main_bp
+    from app.routes.tickets import bp as tickets_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(users_bp, url_prefix='/api/users')
+    app.register_blueprint(tickets_bp, url_prefix='/api/tickets')
     
     # Error handlers
     from app.utils.error_handlers import register_error_handlers
