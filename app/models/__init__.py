@@ -1,3 +1,29 @@
-from .user import User, BaseModel
+from .soporteplus_models import (
+    CatTiquet,
+    CatalogoCriticidad,
+    NivelSatisfaccion,
+    Rol,
+    Permiso,
+    RolPermiso,
+    Ubicaciones,
+    EstadoTiquet,
+    Usuario,
+    Tiquet,
+    Comentarios,
+    LogTransaccional
+)
 
-__all__ = ['User', 'BaseModel']
+__all__ = [
+    'CatTiquet',
+    'CatalogoCriticidad',
+    'NivelSatisfaccion',
+    'Rol',
+    'Permiso',
+    'RolPermiso',
+    'Ubicaciones',
+    'EstadoTiquet',
+    'Usuario',
+    'Tiquet',
+    'Comentarios',
+    'LogTransaccional'
+]

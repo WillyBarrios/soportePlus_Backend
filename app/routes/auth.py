@@ -3,23 +3,22 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from marshmallow import Schema, fields, ValidationError
 
 from app import db
-from app.models import User
+from app.models.soporteplus_models import Usuario  # Usar el modelo Usuario real
 
 auth_bp = Blueprint('auth', __name__)
 
 
 class RegisterSchema(Schema):
     """Schema for user registration."""
-    username = fields.Str(required=True, validate=lambda x: len(x) >= 3)
+    nombre = fields.Str(required=True, validate=lambda x: len(x) >= 3)
     email = fields.Email(required=True)
     password = fields.Str(required=True, validate=lambda x: len(x) >= 6)
-    first_name = fields.Str(required=True)
-    last_name = fields.Str(required=True)
+    ID_Rol = fields.Int(required=False, missing=2)  # Por defecto rol técnico
 
 
 class LoginSchema(Schema):
     """Schema for user login."""
-    username = fields.Str(required=True)
+    email = fields.Email(required=True)
     password = fields.Str(required=True)
 
 
@@ -33,19 +32,19 @@ def register():
     except ValidationError as err:
         return jsonify({'errors': err.messages}), 400
     
-    # Check if user already exists
-    if User.query.filter_by(username=data['username']).first():
-        return jsonify({'error': 'Username already exists'}), 400
-    
-    if User.query.filter_by(email=data['email']).first():
+    # Check if user already exists by email (more reliable than name)
+    if Usuario.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Email already exists'}), 400
     
+    # Check if name already exists (optional check)
+    if Usuario.query.filter_by(Nombre=data['nombre']).first():
+        return jsonify({'error': 'Username already exists'}), 400
+    
     # Create new user
-    user = User(
-        username=data['username'],
+    user = Usuario(
+        Nombre=data['nombre'],
         email=data['email'],
-        first_name=data['first_name'],
-        last_name=data['last_name']
+        ID_Rol=data['ID_Rol']
     )
     user.set_password(data['password'])
     user.save()
@@ -56,10 +55,10 @@ def register():
     return jsonify({
         'message': 'User registered successfully',
         'user': {
-            'id': user.id,
-            'username': user.username,
+            'id': user.ID_usuario,
+            'nombre': user.Nombre,
             'email': user.email,
-            'full_name': user.full_name
+            'ID_Rol': user.ID_Rol
         },
         'tokens': tokens
     }), 201
@@ -75,8 +74,8 @@ def login():
     except ValidationError as err:
         return jsonify({'errors': err.messages}), 400
     
-    # Find user
-    user = User.query.filter_by(username=data['username']).first()
+    # Find user by email
+    user = Usuario.query.filter_by(email=data['email']).first()
     
     if not user or not user.check_password(data['password']):
         return jsonify({'error': 'Invalid credentials'}), 401
@@ -90,10 +89,11 @@ def login():
     return jsonify({
         'message': 'Login successful',
         'user': {
-            'id': user.id,
-            'username': user.username,
+            'id': user.ID_usuario,
+            'nombre': user.Nombre,
             'email': user.email,
-            'full_name': user.full_name
+            'ID_Rol': user.ID_Rol,
+            'is_admin': user.is_admin
         },
         'tokens': tokens
     })
@@ -103,16 +103,15 @@ def login():
 @jwt_required()
 def get_current_user():
     """Get current user information."""
-    user_id = get_jwt_identity()
-    user = User.query.get_or_404(user_id)
+    user_id = int(get_jwt_identity())  # Convertir de string a int
+    user = Usuario.query.get_or_404(user_id)
     
     return jsonify({
         'user': {
-            'id': user.id,
-            'username': user.username,
+            'id': user.ID_usuario,
+            'nombre': user.Nombre,
             'email': user.email,
-            'full_name': user.full_name,
-            'is_admin': user.is_admin,
-            'created_at': user.created_at.isoformat()
+            'ID_Rol': user.ID_Rol,
+            'is_admin': user.is_admin
         }
     })
