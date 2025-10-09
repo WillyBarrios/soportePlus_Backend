@@ -73,7 +73,7 @@ SECRET_KEY=your-secret-key
 JWT_SECRET_KEY=your-jwt-secret-key
 
 # Remote Database Configuration
-DATABASE_URL=mysql+pymysql://wbarrios:Coconut%202112.@173.214.172.154/soporteplus
+
 
 # CORS Configuration
 CORS_ORIGINS=http://localhost:3000,http://localhost:8080
@@ -225,13 +225,7 @@ La aplicación está configurada para conectarse a:
 - **Puerto**: 3306 (MySQL estándar)
 - **SSL**: Conexión segura configurada
 
-### Variables de Entorno para Producción
-```env
-FLASK_ENV=production
-DATABASE_URL=mysql+pymysql://wbarrios:Coconut%202112.@173.214.172.154/soporteplus
-SECRET_KEY=production-secret-key
-JWT_SECRET_KEY=production-jwt-secret
-```
+
 
 ## 📦 Dependencias Principales
 
