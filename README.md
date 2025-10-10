@@ -106,6 +106,7 @@ La aplicación estará disponible en `http://localhost:5000`
 - `GET /api/tickets/criticidades` - Obtener niveles de criticidad
 - `GET /api/tickets/ubicaciones` - Obtener ubicaciones disponibles
 - `GET /api/tickets/prioridades` - Obtener niveles de prioridad
+- `GET /api/tickets/dashboard/stats` - Obtener estadísticas del dashboard
 
 ## 🔐 Autenticación
 
