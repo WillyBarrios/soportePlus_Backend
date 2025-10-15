@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, ValidationError
+from flask_cors import cross_origin
 
 from app import db
 from app.models.soporteplus_models import Usuario  # Usar el modelo Usuario real
@@ -64,9 +65,10 @@ def register():
     }), 201
 
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST', 'OPTIONS'])
+@cross_origin(origins=['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:8080'])
 def login():
-    """Login user."""
+    """Login user."""        
     schema = LoginSchema()
     
     try:

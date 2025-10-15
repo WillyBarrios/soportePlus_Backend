@@ -22,7 +22,7 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
     
     # CORS
-    CORS_ORIGINS = config('CORS_ORIGINS', default='*')
+    CORS_ORIGINS = config('CORS_ORIGINS', default='http://localhost:3000,http://localhost:8080')
     
     # Pagination
     POSTS_PER_PAGE = config('POSTS_PER_PAGE', default=20, cast=int)

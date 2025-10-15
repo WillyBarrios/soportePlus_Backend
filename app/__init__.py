@@ -25,7 +25,17 @@ def create_app(config_name='default'):
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
-    cors.init_app(app)
+    
+    # Configure CORS with specific origins and all necessary headers
+    cors_origins = app.config.get('CORS_ORIGINS', '*')
+    if cors_origins != '*':
+        cors_origins = [origin.strip() for origin in cors_origins.split(',')]
+    
+    cors.init_app(app, 
+                  origins=cors_origins, 
+                  supports_credentials=True,
+                  allow_headers=['Content-Type', 'Authorization'],
+                  methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
     jwt.init_app(app)
     ma.init_app(app)
     
