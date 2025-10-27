@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from app.models import Usuario
+from app.models.soporteplus_models import Usuario
 
 users_bp = Blueprint('users', __name__)
 
@@ -16,8 +16,8 @@ def get_users():
     if not current_user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Check if user is admin (tipo_usuario = 'Administrador')
-    if current_user.tipo_usuario != 'Administrador':
+    # Check if user is admin (ID_Rol = 1)
+    if not current_user.is_admin:
         return jsonify({'error': 'Admin access required'}), 403
     
     users = Usuario.query.all()
@@ -25,12 +25,11 @@ def get_users():
     
     for user in users:
         users_data.append({
-            'id': user.id,
+            'id': user.ID_usuario,
             'email': user.email,
-            'nombre': user.nombre,
-            'apellido': user.apellido,
-            'tipo_usuario': user.tipo_usuario,
-            'fecha_creacion': user.fecha_creacion.isoformat() if user.fecha_creacion else None
+            'nombre': user.Nombre,
+            'rol_id': user.ID_Rol,
+            'is_admin': user.is_admin
         })
     
     return jsonify({'users': users_data})
@@ -43,20 +42,19 @@ def get_user(user_id):
     current_user_id = get_jwt_identity()
     
     # Users can only see their own profile or admin can see all
-    if current_user_id != user_id:
+    if int(current_user_id) != user_id:
         current_user = Usuario.query.get(current_user_id)
-        if not current_user or current_user.tipo_usuario != 'Administrador':
+        if not current_user or not current_user.is_admin:
             return jsonify({'error': 'Access denied'}), 403
     
     user = Usuario.query.get_or_404(user_id)
     
     return jsonify({
         'user': {
-            'id': user.id,
+            'id': user.ID_usuario,
             'email': user.email,
-            'nombre': user.nombre,
-            'apellido': user.apellido,
-            'tipo_usuario': user.tipo_usuario,
-            'fecha_creacion': user.fecha_creacion.isoformat() if user.fecha_creacion else None
+            'nombre': user.Nombre,
+            'rol_id': user.ID_Rol,
+            'is_admin': user.is_admin
         }
     })

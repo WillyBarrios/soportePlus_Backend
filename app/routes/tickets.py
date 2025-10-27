@@ -190,19 +190,23 @@ def delete_ticket(ticket_id):
     """Eliminar un ticket"""
     try:
         ticket = Tiquet.query.get_or_404(ticket_id)
+        
+        # Opcional: Eliminar registros relacionados primero si es necesario
+        # (SQLAlchemy debería manejar esto automáticamente si está configurado en cascade)
+        
         db.session.delete(ticket)
         db.session.commit()
         
         return jsonify({
             'status': 'success',
-            'message': 'Ticket eliminado exitosamente'
+            'message': f'Ticket {ticket_id} eliminado exitosamente'
         })
         
     except Exception as e:
         db.session.rollback()
         return jsonify({
             'status': 'error',
-            'message': str(e)
+            'message': f'Error al eliminar ticket: {str(e)}'
         }), 500
 
 

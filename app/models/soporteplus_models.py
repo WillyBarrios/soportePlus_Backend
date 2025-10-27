@@ -176,18 +176,20 @@ class Comentarios(db.Model):
     """Modelo para Comentarios - Comentarios de tickets"""
     __tablename__ = 'Comentarios'
     
-    Id_comentario = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_usuario'), nullable=True)
-    Tiquet = db.Column(db.Integer, db.ForeignKey('Tiquet.Id_Tiquet'), nullable=True)
-    Comentario = db.Column(db.Text, nullable=True)
-    Fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    ID_comentario = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    mensaje = db.Column(db.String(255), nullable=True)
+    Tipo = db.Column(db.Enum('Usuario', 'tecnico'), nullable=True)
+    Satisfaccion = db.Column(db.Integer, nullable=True)
+    usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_usuario'), nullable=True)
+    Id_Tiquet = db.Column(db.Integer, db.ForeignKey('Tiquet.Id_Tiquet'), nullable=True)
+    Fecha = db.Column(db.Date, nullable=True)
     
     # Relaciones
     usuario_rel = db.relationship('Usuario', backref='comentarios')
     tiquet_rel = db.relationship('Tiquet', backref='comentarios')
     
     def __repr__(self):
-        return f'<Comentarios {self.Id_comentario}>'
+        return f'<Comentarios {self.ID_comentario}>'
 
 
 class LogTransaccional(db.Model):
@@ -198,7 +200,7 @@ class LogTransaccional(db.Model):
     Usuario = db.Column(db.Integer, db.ForeignKey('Usuario.ID_usuario'), nullable=True)
     Tiquet = db.Column(db.Integer, db.ForeignKey('Tiquet.Id_Tiquet'), nullable=True)
     Accion = db.Column(db.String(255), nullable=True)
-    Fecha = db.Column(db.DateTime, default=datetime.utcnow)
+    # Fecha = db.Column(db.DateTime, default=datetime.utcnow)  # Comentado temporalmente - verificar nombre real en BD
     
     # Relaciones
     usuario_rel = db.relationship('Usuario', backref='logs')
