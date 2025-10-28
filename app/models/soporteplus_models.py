@@ -160,6 +160,7 @@ class Tiquet(db.Model):
     Descripcion = db.Column(db.String(500), nullable=True)
     User_asig = db.Column(db.Integer, db.ForeignKey('Usuario.ID_usuario'), nullable=True)
     Estado = db.Column(db.Integer, db.ForeignKey('Estado_tiquet.ID_estado'), nullable=True)
+    Fecha_apertura = db.Column(db.Date, nullable=True, default=datetime.utcnow().date())
     
     # Relaciones con backref
     categoria_rel = db.relationship('CatTiquet', backref='tiquets')

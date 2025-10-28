@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from sqlalchemy.orm import joinedload
+from datetime import datetime
 from app import db
 from app.models.soporteplus_models import (
     Tiquet, CatTiquet, EstadoTiquet, CatalogoCriticidad,
     Ubicaciones, Usuario, Comentarios
 )
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, pre_load, ValidationError
 
 bp = Blueprint('tickets', __name__)
 
@@ -20,6 +22,8 @@ class TiquetSchema(Schema):
     Descripcion = fields.Str(allow_none=True)
     User_asig = fields.Int(allow_none=True)
     Estado = fields.Int(allow_none=True)
+    Fecha_apertura = fields.Raw(allow_none=True)  # Manejado completamente en pre_load
+    fecha_apertura_input = fields.Str(load_only=True, allow_none=True)  # Para recibir dd-mm-yyyy
     
     # Campos relacionados
     categoria_rel = fields.Nested('CatTiquetSchema', dump_only=True)
@@ -27,6 +31,24 @@ class TiquetSchema(Schema):
     criticidad_rel = fields.Nested('CatalogoCriticidadSchema', dump_only=True)
     estado_rel = fields.Nested('EstadoTiquetSchema', dump_only=True)
     usuario_asignado = fields.Nested('UsuarioSchema', dump_only=True)
+    
+    @pre_load
+    def convert_date_format(self, data, **kwargs):
+        """Convierte fecha de dd-mm-yyyy a yyyy-mm-dd para la base de datos"""
+        if 'fecha_apertura_input' in data and data['fecha_apertura_input']:
+            try:
+                # Convertir de dd-mm-yyyy a date object
+                fecha_input = data['fecha_apertura_input']
+                fecha_obj = datetime.strptime(fecha_input, '%d-%m-%Y').date()
+                data['Fecha_apertura'] = fecha_obj
+                # Remover el campo temporal
+                del data['fecha_apertura_input']
+            except ValueError:
+                raise ValidationError('Fecha debe estar en formato dd-mm-yyyy', 'fecha_apertura_input')
+        elif 'Fecha_apertura' not in data or data.get('Fecha_apertura') is None:
+            # Si no se proporciona fecha, usar fecha actual
+            data['Fecha_apertura'] = datetime.utcnow().date()
+        return data
 
 
 class CatTiquetSchema(Schema):
@@ -79,9 +101,17 @@ ubicaciones_schema = UbicacionesSchema(many=True)
 @bp.route('/tickets', methods=['GET'])
 @jwt_required()
 def get_tickets():
-    """Obtener todos los tickets"""
+    """Obtener todos los tickets con sus relaciones cargadas"""
     try:
-        tickets = Tiquet.query.all()
+        # Cargar tickets con todas sus relaciones usando joinedload
+        tickets = Tiquet.query.options(
+            joinedload(Tiquet.categoria_rel),
+            joinedload(Tiquet.ubicacion_rel),
+            joinedload(Tiquet.criticidad_rel),
+            joinedload(Tiquet.usuario_asignado),
+            joinedload(Tiquet.estado_rel)
+        ).all()
+        
         return jsonify({
             'status': 'success',
             'data': tiquets_schema.dump(tickets),
@@ -97,9 +127,23 @@ def get_tickets():
 @bp.route('/tickets/<int:ticket_id>', methods=['GET'])
 @jwt_required()
 def get_ticket(ticket_id):
-    """Obtener un ticket específico"""
+    """Obtener un ticket específico con sus relaciones cargadas"""
     try:
-        ticket = Tiquet.query.get_or_404(ticket_id)
+        # Cargar ticket específico con todas sus relaciones
+        ticket = Tiquet.query.options(
+            joinedload(Tiquet.categoria_rel),
+            joinedload(Tiquet.ubicacion_rel),
+            joinedload(Tiquet.criticidad_rel),
+            joinedload(Tiquet.usuario_asignado),
+            joinedload(Tiquet.estado_rel)
+        ).filter_by(Id_Tiquet=ticket_id).first()
+        
+        if not ticket:
+            return jsonify({
+                'status': 'error',
+                'message': 'Ticket not found'
+            }), 404
+            
         return jsonify({
             'status': 'success',
             'data': tiquet_schema.dump(ticket)
@@ -114,35 +158,50 @@ def get_ticket(ticket_id):
 @bp.route('/tickets', methods=['POST'])
 @jwt_required()
 def create_ticket():
-    """Crear un nuevo ticket"""
+    """Crear un nuevo ticket con conversión de fecha"""
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se proporcionaron datos'
+            }), 400
         
-        # Validar datos
-        errors = tiquet_schema.validate(data)
-        if errors:
+        # Validar y transformar datos usando el schema
+        try:
+            validated_data = tiquet_schema.load(data)
+        except ValidationError as err:
             return jsonify({
                 'status': 'error',
                 'message': 'Datos inválidos',
-                'errors': errors
+                'errors': err.messages
             }), 400
         
-        # Crear ticket
-        ticket = Tiquet(**data)
+        # Crear ticket con datos validados
+        ticket = Tiquet(**validated_data)
         db.session.add(ticket)
         db.session.commit()
+        
+        # Cargar ticket con relaciones para la respuesta
+        ticket_with_relations = Tiquet.query.options(
+            joinedload(Tiquet.categoria_rel),
+            joinedload(Tiquet.ubicacion_rel),
+            joinedload(Tiquet.criticidad_rel),
+            joinedload(Tiquet.usuario_asignado),
+            joinedload(Tiquet.estado_rel)
+        ).filter_by(Id_Tiquet=ticket.Id_Tiquet).first()
         
         return jsonify({
             'status': 'success',
             'message': 'Ticket creado exitosamente',
-            'data': tiquet_schema.dump(ticket)
+            'data': tiquet_schema.dump(ticket_with_relations)
         }), 201
         
     except Exception as e:
         db.session.rollback()
         return jsonify({
             'status': 'error',
-            'message': str(e)
+            'message': f'Error interno del servidor: {str(e)}'
         }), 500
 
 

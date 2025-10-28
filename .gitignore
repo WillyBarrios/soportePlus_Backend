@@ -103,3 +103,17 @@ DEVELOPMENT.md
 PROJECT_CLEAN.md
 MIGRATION_SUCCESS.md
 scripts.bat
+DELETE_USERS_ENDPOINT.md
+PUT_USERS_ENDPOINT.md
+USERS_ENDPOINTS_SUMMARY.md
+debug_relations.py
+insertar_datos_prueba.py
+test_endpoint.py
+tickets_with_relations_fix.md
+verificar_relaciones.py
+probar_fecha_tickets.py
+RESUMEN_FINAL_TICKETS.md
+simple_test.py
+test_user_creation.py
+TICKETS_CON_FECHA_APERTURA.md
+verificar_roles.py
