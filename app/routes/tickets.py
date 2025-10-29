@@ -24,6 +24,7 @@ class TiquetSchema(Schema):
     Estado = fields.Int(allow_none=True)
     Fecha_apertura = fields.Raw(allow_none=True)  # Manejado completamente en pre_load
     fecha_apertura_input = fields.Str(load_only=True, allow_none=True)  # Para recibir dd-mm-yyyy
+    Fecha_cierre = fields.Raw(allow_none=True, dump_only=True)  # Solo para lectura, se establece automáticamente
     
     # Campos relacionados
     categoria_rel = fields.Nested('CatTiquetSchema', dump_only=True)
@@ -266,6 +267,78 @@ def delete_ticket(ticket_id):
         return jsonify({
             'status': 'error',
             'message': f'Error al eliminar ticket: {str(e)}'
+        }), 500
+
+
+@bp.route('/tickets/<int:ticket_id>/close', methods=['PUT'])
+@jwt_required()
+def close_ticket(ticket_id):
+    """Cerrar un ticket - establece fecha de cierre y cambia estado a cerrado"""
+    try:
+        # Buscar el ticket
+        ticket = Tiquet.query.get_or_404(ticket_id)
+        
+        # Buscar el estado "cerrado" (asumiendo que existe un estado con nombre "Cerrado")
+        estado_cerrado = EstadoTiquet.query.filter_by(Nombre='Cerrado').first()
+        if not estado_cerrado:
+            # Si no encuentra "Cerrado", buscar por variaciones comunes
+            estado_cerrado = EstadoTiquet.query.filter(
+                EstadoTiquet.Nombre.ilike('%cerrado%') | 
+                EstadoTiquet.Nombre.ilike('%closed%') |
+                EstadoTiquet.Nombre.ilike('%finalizado%')
+            ).first()
+        
+        if not estado_cerrado:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se encontró un estado de "Cerrado" en el sistema'
+            }), 400
+        
+        # Verificar si el ticket ya está cerrado
+        if ticket.Estado == estado_cerrado.ID_estado and ticket.Fecha_cierre:
+            return jsonify({
+                'status': 'warning',
+                'message': 'El ticket ya está cerrado',
+                'data': {
+                    'Id_Tiquet': ticket.Id_Tiquet,
+                    'Estado': ticket.Estado,
+                    'Fecha_cierre': ticket.Fecha_cierre.strftime('%d-%m-%Y') if ticket.Fecha_cierre else None
+                }
+            })
+        
+        # Cerrar el ticket
+        ticket.Estado = estado_cerrado.ID_estado
+        ticket.Fecha_cierre = datetime.utcnow().date()
+        
+        db.session.commit()
+        
+        # Cargar relaciones para la respuesta
+        ticket_with_relations = Tiquet.query.options(
+            joinedload(Tiquet.categoria_rel),
+            joinedload(Tiquet.ubicacion_rel), 
+            joinedload(Tiquet.criticidad_rel),
+            joinedload(Tiquet.estado_rel),
+            joinedload(Tiquet.usuario_asignado)
+        ).get(ticket_id)
+        
+        return jsonify({
+            'status': 'success',
+            'message': f'Ticket {ticket_id} cerrado exitosamente',
+            'data': {
+                'Id_Tiquet': ticket_with_relations.Id_Tiquet,
+                'Estado': ticket_with_relations.Estado,
+                'Estado_nombre': ticket_with_relations.estado_rel.Nombre if ticket_with_relations.estado_rel else None,
+                'Fecha_apertura': ticket_with_relations.Fecha_apertura.strftime('%d-%m-%Y') if ticket_with_relations.Fecha_apertura else None,
+                'Fecha_cierre': ticket_with_relations.Fecha_cierre.strftime('%d-%m-%Y') if ticket_with_relations.Fecha_cierre else None,
+                'Descripcion': ticket_with_relations.Descripcion
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al cerrar ticket: {str(e)}'
         }), 500
 
 

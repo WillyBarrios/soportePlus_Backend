@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from marshmallow import Schema, fields, ValidationError
 
 from app import db
-from app.models.soporteplus_models import Usuario
+from app.models.soporteplus_models import Usuario, Rol
 
 users_bp = Blueprint('users', __name__)
 
@@ -14,6 +14,12 @@ class UpdateUserSchema(Schema):
     email = fields.Email(required=False)
     password = fields.Str(required=False, validate=lambda x: len(x) >= 6 if x else True)
     ID_Rol = fields.Int(required=False, validate=lambda x: x in [1, 2, 3] if x is not None else True)  # 1=admin, 2=tecnico, 3=usuario
+
+
+class RolSchema(Schema):
+    """Schema para serializar roles"""
+    ID_Rol = fields.Int(dump_only=True)
+    Nombre = fields.Str(dump_only=True)
 
 
 @users_bp.route('/', methods=['GET'])
@@ -216,4 +222,28 @@ def delete_user(user_id):
         return jsonify({
             'error': 'Failed to delete user',
             'details': str(e)
+        }), 500
+
+
+@users_bp.route('/roles', methods=['GET'])
+@jwt_required()
+def get_roles():
+    """Obtener todos los roles del sistema."""
+    try:
+        # Obtener todos los roles
+        roles = Rol.query.all()
+        
+        # Crear schema para serializar
+        rol_schema = RolSchema(many=True)
+        
+        return jsonify({
+            'status': 'success',
+            'data': rol_schema.dump(roles),
+            'count': len(roles)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al obtener roles: {str(e)}'
         }), 500

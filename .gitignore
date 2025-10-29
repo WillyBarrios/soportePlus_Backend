@@ -117,3 +117,11 @@ simple_test.py
 test_user_creation.py
 TICKETS_CON_FECHA_APERTURA.md
 verificar_roles.py
+ENDPOINT_ROLES_DOCUMENTACION.md
+funcionalidad_cierre_tickets.md
+setup_close_tickets.py
+test_close_tickets.py
+test_roles_endpoint.py
+test_simple_close.py
+verificar_estados.py
+verificar_estructura.py
