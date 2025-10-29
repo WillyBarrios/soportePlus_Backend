@@ -102,6 +102,7 @@ class Usuario(db.Model):
     
     ID_usuario = db.Column(db.Integer, primary_key=True, autoincrement=True)
     Nombre = db.Column(db.String(255), nullable=False)
+    #Apellido = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), nullable=False)
     ID_Rol = db.Column(db.Integer, db.ForeignKey('Rol.ID_Rol'), nullable=True)
     password = db.Column(db.String(255), nullable=False)

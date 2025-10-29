@@ -71,7 +71,8 @@ def get_user(user_id):
             'email': user.email,
             'nombre': user.Nombre,
             'rol_id': user.ID_Rol,
-            'is_admin': user.is_admin
+            'is_admin': user.is_admin,
+            'Apellido': user.Apellido
         }
     })
 

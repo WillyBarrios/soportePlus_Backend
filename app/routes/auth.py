@@ -14,7 +14,7 @@ class RegisterSchema(Schema):
     email = fields.Email(required=True)
     password = fields.Str(required=True, validate=lambda x: len(x) >= 6)
     ID_Rol = fields.Int(required=False, load_default=2, validate=lambda x: x in [1, 2, 3] if x is not None else True)  # Por defecto rol técnico
-
+#    Apellido = fields.Str(required=True, validate=lambda x: len(x) >= 3)
 
 class LoginSchema(Schema):
     """Schema for user login."""
@@ -58,7 +58,8 @@ def register():
             'id': user.ID_usuario,
             'nombre': user.Nombre,
             'email': user.email,
-            'ID_Rol': user.ID_Rol
+            'ID_Rol': user.ID_Rol,
+            #'Apellido': user.Apellido
         },
         'tokens': tokens
     }), 201
