@@ -125,3 +125,4 @@ test_roles_endpoint.py
 test_simple_close.py
 verificar_estados.py
 verificar_estructura.py
+documentacion_categorias_crud.md

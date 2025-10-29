@@ -354,6 +354,124 @@ def get_categorias():
     })
 
 
+@bp.route('/categorias', methods=['POST'])
+@jwt_required()
+def create_categoria():
+    """Crear una nueva categoría"""
+    try:
+        # Validar datos de entrada
+        categoria_data = cat_tiquet_schema.load(request.json)
+        
+        # Crear nueva categoría
+        nueva_categoria = CatTiquet(
+            Unidad_corresponde=categoria_data.get('Unidad_corresponde'),
+            Nombre=categoria_data.get('Nombre')
+        )
+        
+        db.session.add(nueva_categoria)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Categoría creada exitosamente',
+            'data': cat_tiquet_schema.dump(nueva_categoria)
+        }), 201
+        
+    except ValidationError as e:
+        return jsonify({
+            'status': 'error',
+            'message': 'Datos inválidos',
+            'errors': e.messages
+        }), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al crear categoría: {str(e)}'
+        }), 500
+
+
+@bp.route('/categorias/<int:categoria_id>', methods=['PUT'])
+@jwt_required()
+def update_categoria(categoria_id):
+    """Actualizar una categoría existente"""
+    try:
+        # Buscar la categoría
+        categoria = CatTiquet.query.get(categoria_id)
+        if not categoria:
+            return jsonify({
+                'status': 'error',
+                'message': 'Categoría no encontrada'
+            }), 404
+        
+        # Validar datos de entrada
+        categoria_data = cat_tiquet_schema.load(request.json, partial=True)
+        
+        # Actualizar campos
+        if 'Unidad_corresponde' in categoria_data:
+            categoria.Unidad_corresponde = categoria_data['Unidad_corresponde']
+        if 'Nombre' in categoria_data:
+            categoria.Nombre = categoria_data['Nombre']
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Categoría actualizada exitosamente',
+            'data': cat_tiquet_schema.dump(categoria)
+        })
+        
+    except ValidationError as e:
+        return jsonify({
+            'status': 'error',
+            'message': 'Datos inválidos',
+            'errors': e.messages
+        }), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al actualizar categoría: {str(e)}'
+        }), 500
+
+
+@bp.route('/categorias/<int:categoria_id>', methods=['DELETE'])
+@jwt_required()
+def delete_categoria(categoria_id):
+    """Eliminar una categoría"""
+    try:
+        # Buscar la categoría
+        categoria = CatTiquet.query.get(categoria_id)
+        if not categoria:
+            return jsonify({
+                'status': 'error',
+                'message': 'Categoría no encontrada'
+            }), 404
+        
+        # Verificar si la categoría está siendo usada por algún ticket
+        tickets_usando_categoria = Tiquet.query.filter_by(Categoria=categoria_id).first()
+        if tickets_usando_categoria:
+            return jsonify({
+                'status': 'error',
+                'message': 'No se puede eliminar la categoría porque está siendo utilizada por uno o más tickets'
+            }), 400
+        
+        db.session.delete(categoria)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Categoría eliminada exitosamente'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al eliminar categoría: {str(e)}'
+        }), 500
+
+
 @bp.route('/estados', methods=['GET'])
 @jwt_required()
 def get_estados():
